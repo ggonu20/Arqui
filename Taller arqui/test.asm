@@ -8,6 +8,7 @@ espacio:	.asciiz	" "
 verificar:	.space 1			#reservo 1 byte para mi verificador
 cont:		.space 4
 nopal:		.asciiz	"No es un palindromo"
+text3:		.asciiz	"Su contraseña es:"
 		.text
 main:		la	$a0,text1		#carga la direccion de text1
 		li	$v0,4			#instruccion de imprimir string
@@ -76,7 +77,10 @@ start:		li 	$t0,0 			#inicializo t0 como 0
 		li	$t2,0			#inicializo t2 como 0
 		lb	$t5,espacio
 		jal 	contra			#primer while
-		la	$a0,contras		#carga la direccion de palindromo	
+		la	$a0,text3		
+		li	$v0,4			#instruccion de imprimir string de palindromo
+		syscall				#imprime string	
+		la	$a0,contras			
 		li	$v0,4			#instruccion de imprimir string de palindromo
 		syscall				#imprime string	
 		li	$v0,10			#system call for exit
