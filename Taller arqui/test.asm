@@ -2,11 +2,12 @@
 text1:		.asciiz "Ingrese un palindromo :"
 text2:		.asciiz	"Su palabra es:"
 palindromo:	.space 1024			#asigno a palindromo un tamaño de 1024 bytes
-contras:		.space 1024			#asigno a palindromo un tamaño de 1024 bytes
+contras:	.space 1024			#asigno a palindromo un tamaño de 1024 bytes
 fin_palindromo:	.asciiz	"\n"
 espacio:	.asciiz	" "
 verificar:	.space 1			#reservo 1 byte para mi verificador
 cont:		.space 4
+nopal:		.asciiz	"No es un palindromo"
 		.text
 main:		la	$a0,text1		#carga la direccion de text1
 		li	$v0,4			#instruccion de imprimir string
@@ -25,11 +26,16 @@ main:		la	$a0,text1		#carga la direccion de text1
 		jal 	fin			#salto a la etiqueta fin
 		add	$s5,$zero,$t3		#Guardo en el registro s5 el valor del largo de la palabra
 		jal	ver_palindromo		#Salto a la funcion ver_palindromo
-		lb	$a0,verificar		#cargo en a0 el byte dentro de verificar
-		li	$v0,1			#Instruccion de imprimir un numero entero
-		syscall				#llama a imprimir
-		j	start
+		lb 	$t0,verificar
+		beq	$t0,1,si_pal
+		j	no_pal
 		### funciones
+si_pal:		j	start
+no_pal:		la	$a0,nopal		
+		li	$v0,4			#instruccion de imprimir string
+		syscall
+		li	$v0,10			#system call for exit
+		syscall				#end of program
 print:		la	$a0,text2		#carga la direccion de text2
 		li	$v0,4			#instruccion de imprimir string
 		syscall				#imprime
