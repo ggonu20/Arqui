@@ -1,8 +1,10 @@
 		.data
 text1:		.asciiz "Ingrese un palindromo :"
-text2:		.asciiz	"Su palabra es: "
-palindromo:	.space 1024			#asigno a palindromo un tama�o de 1024 bytes
+text2:		.asciiz	"Su palabra es:"
+palindromo:	.space 1024			#asigno a palindromo un tamaño de 1024 bytes
+contras:		.space 1024			#asigno a palindromo un tamaño de 1024 bytes
 fin_palindromo:	.asciiz	"\n"
+espacio:	.asciiz	" "
 verificar:	.space 1			#reservo 1 byte para mi verificador
 cont:		.space 4
 		.text
@@ -11,7 +13,7 @@ main:		la	$a0,text1		#carga la direccion de text1
 		syscall				#imprime
 		la	$a0,palindromo 		#carga la direcion de palindromo
 		li	$v0,8			#instruccion de leer un string
-		li	$a1,1024		#argumento de leer un string (guarda en a1 el string de tama�o 1024)
+		li	$a1,1024		#argumento de leer un string (guarda en a1 el string de tamaño 1024)
 		syscall				#leo la frase
 		li	$s0,0			#inicializo s0 como 0
 		sb	$s0,verificar		#Guardo el byte de s0 en verificar
@@ -26,9 +28,7 @@ main:		la	$a0,text1		#carga la direccion de text1
 		lb	$a0,verificar		#cargo en a0 el byte dentro de verificar
 		li	$v0,1			#Instruccion de imprimir un numero entero
 		syscall				#llama a imprimir
-		jal	contra
-		li	$v0,10			#system call for exit
-		syscall				#end of program
+		j	start
 		### funciones
 print:		la	$a0,text2		#carga la direccion de text2
 		li	$v0,4			#instruccion de imprimir string
@@ -61,7 +61,44 @@ ver:		li	$s0,1			#guarda en s0 el valor
 		sb	$s0,verificar		#Guarda 1 byte de s0 dentro de verificar
 		li	$s0,0			#deja el s0 con el valor 0
 		jr 	$ra			#llama de vuelta a la siguiente instruccion guardada en ra, en la linea 24,despues del jal a ver palindromo
-		#s1 contador, s5 es el tama�o
-contra:		
+		########################################################
+		#s5 =  tamaño
+		#t0 = j		#t1 = pos 	#t2 = inicio	#t6 = letra actual
+		#t3 = letra	#t4 = cont	#t5 = espacio
+start:		li 	$t0,0 			#inicializo t0 como 0
+		li	$t1,0			#inicializo t1 como 0
+		li	$t2,0			#inicializo t2 como 0
+		lb	$t5,espacio
+		jal 	contra			#primer while
+		la	$a0,contras		#carga la direccion de palindromo	
+		li	$v0,4			#instruccion de imprimir string de palindromo
+		syscall				#imprime string	
+		li	$v0,10			#system call for exit
+		syscall				#end of program
+contra:		add	$t2,$zero,$t0
+		lb 	$t3,palindromo($t2)	
+		li 	$t4,0
+		beq	$t3,$t5,salto2		#beq, letra = espacio
+		ble	$t0,$s5,loop1 		#ble, es j <= tamaño		
 		jr 	$ra
-
+loop1:		lb 	$t6,palindromo($t2)
+		beq	$t6,$t5,salto
+		beq 	$t6,$t3,if		# beq, es = , letra actual y letra buscada
+		addi	$t2,$t2,1
+		ble	$t2,$s5,loop1
+		j	guardar		
+if:		addi	$t4,$t4,1
+		sb 	$t5,palindromo($t2)
+		addi	$t2,$t2,1
+		b 	loop1
+salto:		addi	$t2,$t2,1
+		b	loop1
+guardar:	addi	$t4,$t4,48
+		sb	$t4,contras($t1)
+		addi	$t1,$t1,1
+		sb	$t3,contras($t1)
+		addi	$t1,$t1,1
+		addi	$t0,$t0,1
+		j	contra	
+salto2:		addi	$t0,$t0,1
+		b	contra
